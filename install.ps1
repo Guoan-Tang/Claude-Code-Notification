@@ -12,29 +12,39 @@
 
 $ErrorActionPreference = "Stop"
 
+# ── Configuration ────────────────────────────────────────────────────
+$repoBaseUrl  = "https://raw.githubusercontent.com/Guoan-Tang/Claude-Code-Notification/main"
+$notifyUrl    = "$repoBaseUrl/scripts/notify.ps1"
+
 # ── Paths ────────────────────────────────────────────────────────────
-$scriptDir    = $PSScriptRoot
-$sourceScript = Join-Path $scriptDir "scripts\notify.ps1"
 $destDir      = Join-Path $env:USERPROFILE "scripts"
 $destScript   = Join-Path $destDir "notify.ps1"
 $notifyScript = $destScript -replace '\\', '/'
 $claudeDir    = Join-Path $env:USERPROFILE ".claude"
 $settingsFile = Join-Path $claudeDir "settings.json"
 
-# Verify source notify.ps1 exists
-if (-not (Test-Path $sourceScript)) {
-    Write-Host "ERROR: scripts/notify.ps1 not found. Run this script from the project root." -ForegroundColor Red
-    exit 1
-}
-
-# ── Deploy notify.ps1 to $USERPROFILE/scripts ────────────────────────
+# ── Download notify.ps1 to $USERPROFILE/scripts ─────────────────────
 if (-not (Test-Path $destDir)) {
     New-Item -ItemType Directory -Path $destDir -Force | Out-Null
     Write-Host "Created $destDir" -ForegroundColor Gray
 }
 
-Copy-Item $sourceScript $destScript -Force
-Write-Host "Deployed notify.ps1 to $destScript" -ForegroundColor Gray
+# Use local copy if running from the repo, otherwise download from GitHub
+$localSource = Join-Path $PSScriptRoot "scripts\notify.ps1"
+if ($PSScriptRoot -and (Test-Path $localSource)) {
+    Copy-Item $localSource $destScript -Force
+    Write-Host "Deployed notify.ps1 from local repo to $destScript" -ForegroundColor Gray
+} else {
+    Write-Host "Downloading notify.ps1 from GitHub..." -ForegroundColor Gray
+    try {
+        Invoke-WebRequest -Uri $notifyUrl -OutFile $destScript -UseBasicParsing
+        Write-Host "Downloaded notify.ps1 to $destScript" -ForegroundColor Gray
+    } catch {
+        Write-Host "ERROR: Failed to download notify.ps1 from $notifyUrl" -ForegroundColor Red
+        Write-Host "       $_" -ForegroundColor Red
+        exit 1
+    }
+}
 
 # ── Hook command ─────────────────────────────────────────────────────
 $hookCommand = "pwsh.exe -ExecutionPolicy Bypass -File `"$notifyScript`""

@@ -145,10 +145,3 @@ cd notificationLab0
 
 # 3. Restart Claude Code — notifications are now active
 ```
-
-## Development Plan
-
-- [ ] Implement `scripts/notify.ps1` — Toast notification script
-- [ ] Implement `config/hooks.example.json` — Configuration template
-- [ ] Implement `install.ps1` — One-click installer
-- [ ] End-to-end testing
