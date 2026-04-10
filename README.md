@@ -133,12 +133,6 @@ Automated installer. Responsibilities:
 - Merge hooks configuration without overwriting existing user settings
 - Write back to settings.json
 
-## Install in one command line
-
-```powershell
-git clone <repo-url> && cd notificationLab0 && .\install.ps1
-```
-
 ## Usage
 
 ```powershell
