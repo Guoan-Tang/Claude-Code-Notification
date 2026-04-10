@@ -30,8 +30,15 @@ if (-not (Test-Path $destDir)) {
 }
 
 # Use local copy if running from the repo, otherwise download from GitHub
-if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot "scripts\notify.ps1"))) {
+$useLocal = $false
+if ($PSScriptRoot) {
     $localSource = Join-Path $PSScriptRoot "scripts\notify.ps1"
+    if (Test-Path $localSource) {
+        $useLocal = $true
+    }
+}
+
+if ($useLocal) {
     Copy-Item $localSource $destScript -Force
     Write-Host "Deployed notify.ps1 from local repo to $destScript" -ForegroundColor Gray
 } else {
